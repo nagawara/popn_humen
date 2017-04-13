@@ -1,0 +1,559 @@
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+
+int2str_table = '0123456789abcdefghijklmnopqrstuvwxyz'
+
+def int2str(i, base):
+    if not 2 <= base <= 36:
+        raise ValueError('base must be 2 <= base < 36')
+
+    result = []
+
+    temp = abs(i)
+    if temp == 0:
+        result.append('0')
+    else:
+        while temp > 0:
+            result.append(int2str_table[temp % base])
+            temp /= base
+
+    if i < 0:
+        result.append('-')
+
+    return ''.join(reversed(result))
+
+assert len(int2str_table) == 36
+for i in range(36):
+    if i < 10:
+        assert str(i) == int2str_table[i]
+    else:
+        assert chr(ord('a') + i - 10) == int2str_table[i]
+
+
+img_rgb = cv2.imread('hdrock-e1.png')
+img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+templateaka = cv2.imread('aka.png',0)
+templateshiro = cv2.imread('shiro.bmp',0)
+templateao = cv2.imread('ao.bmp',0)
+templatemidori = cv2.imread('midori.bmp',0)
+templateki = cv2.imread('ki.bmp',0)
+templatenumber = cv2.imread('1.PNG',0)
+img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+
+#Adaptive Gaussian Thresholding
+
+oi = 0
+aka = []
+ao = []
+ki = []
+midori = []
+shiro = []
+number = []
+douji = []
+yiti = []
+xiti = []
+humen = []
+
+threshold = 0.5
+
+
+n0,n1 = templatenumber.shape[::-1]
+res = cv2.matchTemplate(img_gray,templatenumber,cv2.TM_CCOEFF_NORMED)
+loc = np.where( res >= threshold)
+number = loc
+
+
+
+
+w0, h0 = templateaka.shape[::-1]
+w1, h1 = templateshiro.shape[::-1]
+w2, h2 = templateao.shape[::-1]
+w3, h3 = templatemidori.shape[::-1]
+w4, h4 = templateki.shape[::-1]
+
+
+threshold = 0.99
+
+
+res = cv2.matchTemplate(img_gray,templateaka,cv2.TM_CCOEFF_NORMED)
+loc = np.where( res >= threshold)
+aka = loc
+res = cv2.matchTemplate(img_gray,templateao,cv2.TM_CCOEFF_NORMED)
+loc = np.where( res >= threshold)
+ao = loc
+res = cv2.matchTemplate(img_gray,templatemidori,cv2.TM_CCOEFF_NORMED)
+loc = np.where( res >= threshold)
+midori = loc
+res = cv2.matchTemplate(img_gray,templateki,cv2.TM_CCOEFF_NORMED)
+loc = np.where( res >= threshold)
+ki = loc
+res = cv2.matchTemplate(img_gray,templateshiro,cv2.TM_CCOEFF_NORMED)
+loc = np.where( res >= threshold)
+shiro = loc
+k = 1
+murioshi  = []
+
+def cannot(i,n):
+	print("sample")	
+
+for pt1 in zip(*aka[::-1]):
+	for pt2  in zip(*ao[::-1]):
+		if(pt1[1] == pt2[1]):	
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b000110000)
+					yiti.insert(k,pt1[1])
+					xiti.insert(k,pt1[0])
+					k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b000011000)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   oi = 0
+for pt1 in zip(*aka[::-1]):
+	for pt2  in zip(*ki[::-1]):
+		if(pt1[1] == pt2[1]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b010010000)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b000010010)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   oi = 0
+
+for pt1 in zip(*aka[::-1]):
+	for pt2  in zip(*shiro[::-1]):
+		if(pt1[1] == pt2[1]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b100010000)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b000010001)
+					yiti.insert(k,pt1[1])
+					xiti.insert(k,pt1[0])
+					k = k + 1
+			   oi = 0
+
+for pt1 in zip(*aka[::-1]):
+	for pt2  in zip(*midori[::-1]):
+		if(pt1[1] == pt2[1]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b001010000)
+					yiti.insert(k,pt1[1])
+					xiti.insert(k,pt1[0])
+					k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		douji.insert(k, 0b000010100)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+			   oi = 0
+for pt1 in zip(*ao[::-1]):
+	for pt2  in zip(*ki[::-1]):
+		if(pt1[1] == pt2[1]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b010100000)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b010001000)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b000001010)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b000100010)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   oi = 0
+for pt1 in zip(*ao[::-1]):
+	for pt2  in zip(*midori[::-1]):
+		if(pt1[1] == pt2[1]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b001100000)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b001001000)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b000001100)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b000100100)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   oi = 0
+for pt1 in zip(*ao[::-1]):
+	for pt2  in zip(*shiro[::-1]):
+		if(pt1[1] == pt2[1]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<3000):
+			   			douji.insert(k, 0b100100000)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b100001000)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<3000):
+			   			douji.insert(k, 0b000001001)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b000100001)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   oi = 0
+for pt1 in zip(*ki[::-1]):
+	for pt2  in zip(*midori[::-1]):
+		if(pt1[1] == pt2[1]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b000000110)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b001000010)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b011000000)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b010000100)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   oi = 0
+for pt1 in zip(*ki[::-1]):
+	for pt2  in zip(*shiro[::-1]):
+		if(pt1[1] == pt2[1]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b110000000)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b100000010)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b000000011)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b010000001)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   oi = 0
+for pt1 in zip(*midori[::-1]):
+	for pt2  in zip(*shiro[::-1]):
+		if(pt1[1] == pt2[1]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b100000100)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b101000000)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+					if((pt1[0]-pt2[0])*(pt1[0]-pt2[0])<1000):
+			   			douji.insert(k, 0b000000101)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+					else:
+			   			douji.insert(k, 0b001000001)
+						xiti.insert(k,pt1[0])
+						yiti.insert(k,pt1[1])
+						k = k + 1
+			   oi = 0
+
+for pt1 in zip(*ao[::-1]):
+	for pt2  in zip(*ao[::-1]):
+		if(pt1[1] == pt2[1] and pt1[0] != pt2[0]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b000101000)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b000101000)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   oi = 0
+
+for pt1 in zip(*midori[::-1]):
+	for pt2  in zip(*midori[::-1]):
+		if(pt1[1] == pt2[1]and pt1[0] != pt2[0]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b001000100)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b001000100)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   oi = 0
+
+for pt1 in zip(*shiro[::-1]):
+	for pt2  in zip(*shiro[::-1]):
+		if(pt1[1] == pt2[1]and pt1[0] != pt2[0]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b100000001)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b100000001)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   oi = 0
+
+for pt1 in zip(*ki[::-1]):
+	for pt2  in zip(*ki[::-1]):
+		if(pt1[1] == pt2[1] and pt1[0] != pt2[0]):
+			   if(pt1[0]>pt2[0]):
+			   	for i in zip(*number[::-1]):
+			   		if(pt1[0]>i[0] and pt2[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt2, (pt1[0] + w0, pt1[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b010000010)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   else:
+			   	for i in zip(*number[::-1]):
+			   		if(pt2[0]>i[0] and pt1[0]<i[0]):
+						oi = 1
+			   	if(oi==0):
+			   		cv2.rectangle(img_rgb, pt1, (pt2[0] + w0, pt2[1] + h0), (0,0,0), 2)
+			   		douji.insert(k, 0b010000010)
+					xiti.insert(k,pt1[0])
+					yiti.insert(k,pt1[1])
+					k = k + 1
+			   oi = 0
+
+
+u = 0
+			
+for i, a in enumerate(douji):
+	for j, b in enumerate(douji):
+		if(yiti[j] == yiti[i] and a != b ):
+			if(xiti[i]>xiti[j]):
+			   	for k in zip(*number[::-1]):
+			   		if(xiti[i]>k[0] and xiti[j]<k[0]):
+						oi = 1
+			   	if(oi==0):
+					r = a|b
+					humen.insert(u, r)
+					u = u + 1
+			else:
+			   	for k in zip(*number[::-1]):
+			   		if(xiti[j]>k[0] and xiti[i]<k[0]):
+						oi = 1
+			   	if(oi==0):
+					r = a|b
+					humen.insert(u, r)
+					u = u + 1
+			oi = 0
+
+humen_h = np.arange(len(humen)*9).reshape(9,len(humen))
+
+f = open('text.txt', 'w')
+for i in (humen):
+	a = format(i,'09b')
+	f.write(a+("\n"))
+f.close
+
+f = open('text.txt','r')
+data1 = loadtxt("text.txt")  # ファイル終端まで全て読んだデータを返す
+f.close()
+
+
+
+
+
+t = 0
+
+
+
+cv2.imwrite('res.png',img_rgb)
